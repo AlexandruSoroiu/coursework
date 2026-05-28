@@ -12,7 +12,7 @@
 
 # set a relative path for the citibike data
 # (use current directory by default)
-DATA_DIR=.
+DATA_DIR= ./week1/download_trips.sh
 
 # change to the data directory
 cd $DATA_DIR
