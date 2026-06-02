@@ -27,7 +27,7 @@ smaller %>%
 27.3.1 Exercise 3
 ---
 ---
-TODO
+# Alexandru Soroiu
 ---
 
 ---
