@@ -5,6 +5,8 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
 library(ggplot2)
 library(dplyr)
 
@@ -17,22 +19,65 @@ We have data about `r nrow(diamonds)` diamonds. Only
 2.5 carats. The distribution of the remainder is shown
 below:
 
-```{r, echo = FALSE}
+```{r}
 smaller %>% 
   ggplot(aes(carat)) + 
   geom_freqpoly(binwidth = 0.01)
 ```
 
+## Diamond size by cut
+
+```{r}
+ggplot(smaller, aes(cut, carat)) +
+  geom_boxplot()
+```
+
+Diamond size varies across cut grades. Fair-cut diamons tend to have a wider
+range of carat weights and include more large diamonds. Ideal and Premium cuts also show
+considerable variation, although most diamons in every cut category are less
+than one carat. Overall, cut quality appears to be associated with differences in diamond size.
+
+## Diamond size by colour
+
+```{r}
+ggplot(smaller, aes(color, carat)) +
+  geom_boxplot()
+```
+
+The distributions of diamond sizes are fairly similar across colour grades. Median carat weights
+do not differ substantially, suggesting that colour and size are only weakly related. However, some color categories
+contain a wider spread of diamond sizes than others.
+
+## Diamond size by clarity
+
+```{r}
+ggplot(smaller, aes(clarity, carat)) +
+  geom_boxplot()
+```
+
+Diamond size varies somewhat by clarity grade. Lower-clarity diamons tend to include more large stones,
+while the highest clarity grades generally contain smaller diamonds on average. This pattern may reflect
+the rarity and higher cost of diamons that are both large and exceptionally clear.
+
+## Summary
+
+Diamond size differs across cut, colour, and clarity categories, although the stength of these relationships varies.
+Cut appears to have the strongest association with carat weight, while colour shows relatively little variation.
+Clarity displays a moderate relationship with size, with larger diamons appearing more frequently among lower clarity grades.
+
+
 ---
-27.3.1 Exercise 3
+27.3.1 Exercise 3: Check that you can run it, then add text after the frequency polygon that describes its most striking features.
 ---
 ---
-# Alexandru Soroiu
+it is characterized by an overall right skew with sharp, highly asymmetric spikes clustered
+at standard benchmark values (0.3, 0.5, 0.7, and 1.0 carats), illustrating a strong market preference
+for cutting diamonds that meet or slightly exceed these specific weight thresholds
 ---
 
 ---
-27.4.7 Exercise 1
+27.4.7 Exercise 1: Add a section that explores how diamond sizes vary by cut, colour, and clarity. Assume you are writing a report for someone who does not know R, and instead of setting echo = FALSE on each chunk, set a global option.
 ---
 ---
-TODO
+solved above
 ---
