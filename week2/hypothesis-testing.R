@@ -6,20 +6,34 @@ magnets <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/magnets.cs
 
 # 1. What is the sample average of the change in score between the
 #    patient's rating before the application of the device and the
-#    rating after the application?
-# 2. Is the variable "active" a factor or a numeric variable?
+#    rating after the application? # sample average is 3.5
+magnets %>%
+    summarize(mean(change))
+# 2. Is the variable "active" a factor or a numeric variable? # it is a character variable
+class(magnets$active)
 # 3. Compute the average value of the variable "change" for the patients that
 #    received an active magnet and average value for those that received an
 #    inactive placebo. (Hint: Notice that the first 29 patients received an
 #    active magnet and the last 21 patients received an inactive placebo. The
 #    subsequence of the first 29 values can be obtained via "change[1:29]" and
 #    the last 21 values via "change[30:50]".)
+magnets %>%
+    summarize(mean(change[1:29])) # 5.24
+magnets %>%
+    summarize(mean(change[30:50])) # 1.10
 # 4. Compute the sample standard deviation of the variable "change" for the
 #    patients that received an active magnet and the sample standard deviation
 #    for those that received an inactive placebo.
+magnets %>%
+    summarize(sd(change[1:29])) # 3.24
+magnets %>%
+    summarize(sd(change[30:50])) # 1.58
 # 5. Produce a boxplot of the variable "change" for the patients that received
 #    an active magnet and for patients that received an inactive placebo. What
-#    is the number of outliers in each subsequence?
+#    is the number of outliers in each subsequence? # 3 outliers for the group placebo, and 0 outliers for group active
+magnets %>%
+    ggplot(aes(x = change, y = active)) +
+    geom_boxplot()
 
 ####################################################################################
 # IST Chapter 10, Exercise 10.1
