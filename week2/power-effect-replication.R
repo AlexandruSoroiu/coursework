@@ -26,9 +26,26 @@ magnets <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/magnets.cs
 #   expected value of X, the null hypothesis and the alternative hypothesis
 #   for a statistical test to determine the presence of a placebo effect. The null
 #   hypothesis should reflect the situation that the placebo effect is absent
+x = magnets$score1 - magnets$score2
+#   X = pain before - pain after
+#   So, X > 0: pain decreased (improvement)
+#   X = 0: no change on average
+#   Null hypothesis (no placebo effect)
+#   No improvement on average, so E[X] = 0
+#   Alternative hypothesis (placebo effect exists)
+#   Patients improve even though treatment is inactive:
+#   E[X] > 0.
+#   This is a one-sided test.
 # 2. Identify the observations that can be used in order to test the hypotheses.
+#   last 21 observations = placebo group (inactive magnets)
+placebo <- magnets %>% tail(21)
+x_placebo <- placebo$score1 - placebo$score2
 # 3. Carry out the test and report your conclusion. (Use a significance level of
 #    5%.)
+#    E[X] = 0 (null) & E[X] > 0 (alternative)
+t.test(x_placebo, mu = 0, alternative = "greater")
+#   Conclusion: At the 5% significance level, we reject the null hypothesis. There is sufficient statistical evidence to conclude
+#   that the mean change in pain score for the placebo group is greater than 0. This suggest the presence of a placebo effect in the study.
 
 ####################################################################################
 # IST Chapter 13, Exercise 13.1
@@ -50,11 +67,35 @@ magnets <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/magnets.cs
 # All tests should conducted at the 5% significance level:
 # 1. Is there a significance difference between the treatment and the control
 #    groups in the expectation of the reported score of pain before the application of the device?
+t.test(score1 ~ active, data = magnets)
+# p-value is 0.68
+# mean(active = 1) = 9.62
+# mean(active = 2) = 9.52
+# difference is small
+# u1 = u2
+# u1 is different than u2
+# Since 0.68 > 0.05, we fail to reject H0
+# There is no statistically significant difference in the mean baseline pain score (score1) between the treatment
+# and control groups (p = 0.68). This suggest that random assignment was successful and the groups were comparable before
+# treatment.
 # 2. Is there a significance difference between the treatment and the control
 #    groups in the variance of the reported score of pain before the application
 #    of the device?
+var.test(score1 ~ active, data = magnets)
+# p-value = 0.36. Fail to reject H0
+# There is no statistically significant difference in the variance of baseline pain scores
+# between the two groups. This suggests similar variability before treatment.
 # 3. Is there a significance difference between the treatment and the control
 #    groups in the expectation of the change in score that resulted from the
 #    application of the device?
+t.test(change ~ active, data = magnets)
+# p-value < 0.05 -> reject H0
+# There is strong statistical evidence that the mean change in pain differs between the treatment and control groups.
+# Patients receiving the active magnets experienced a significantly greater reduction in pain
+# than those receiving the placebo.
 # 4. Is there a significance difference between the treatment and the control
 #    groups in the variance of the change in score that resulted from the application of the device?
+var.test(change ~ active, data = magnets)
+# p-value (0.0015) < 0.05 -> Reject H0
+# There is a statistically significant difference in the variance of pain change between the two groups. The
+# active treatment not only changes the mean response but also affects how variable patient responses are.
