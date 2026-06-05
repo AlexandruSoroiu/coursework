@@ -47,11 +47,45 @@ magnets %>%
 #    of size n = 100 from the Normal(3, 2) distribution. Compute the expectation
 #    and the variance of the sample average and of the sample median. Which of
 #    the two estimators has a smaller mean square error?
-#
+
+sample_means <- replicate(10000, {
+    x <- rnorm(100, mean = 3, sd = 2)
+    mean(x)
+})
+
+sample_medians <- replicate(10000, {
+    x <- rnorm(100, mean = 3, sd = 2)
+    median(x)
+})
+
+mean(sample_means)
+var(sample_means)
+mean(sample_medians)
+var(sample_medians)
+
+# true value is 3, both are basically unbiased here, so bias = 0. Though, the sample mean has smaller MSE, so it is a better estimator.
+
 # 2. Simulate the sampling distribution of average and the median of a sample
 #    of size n = 100 from the Uniform(0.5, 5.5) distribution. Compute the
 #    expectation and the variance of the sample average and of the sample
 #    median. Which of the two estimators has a smaller mean square error?
+
+sample_means <- replicate(10000, {
+    x <- runif(100, min = 0.5, max = 5.5)
+    mean(x)
+})
+
+sample_medians <- replicate(10000, {
+    x <- runif(100, min = 0.5, max = 5.5)
+    median(x)
+})
+
+mean(sample_means)
+var(sample_means)
+mean(sample_medians)
+var(sample_medians)
+
+# Both estimators are basically unbiased again.
 
 ####################################################################################
 # IST Chapter 10, Exercise 10.2
@@ -74,16 +108,29 @@ ex2 <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/ex2.csv")
 
 # 1. Compute the proportion in the sample of those with a high level of blood
 #    pressure.
+mean(ex2$group == "HIGH") # 0.25
 # 2. Compute the proportion in the population of those with a high level of
 #    blood pressure.
+mean(pop2$group == "HIGH") # 0.281
 # 3. Simulate the sampling distribution of the sample proportion and compute
 #    its expectation.
+samples <- replicate(10000, {
+    s <- pop2[sample(nrow(pop2), 150), ]
+    mean(s$group == "HIGH")
+})
+
+mean(samples) # 0.281
 # 4. Compute the variance of the sample proportion.
+var(samples) # 0.0013
 # 5. It is proposed in Section 10.5 that the variance of the sample proportion
 #    is Var(P_hat) = p(1 - p)/n, where p is the probability of the event (having
 #    a high blood pressure in our case) and n is the sample size (n = 150 in our
 #    case). Examine this proposal in the current setting.
 
+p <- mean(pop2$group == "HIGH")
+n <- 150
+
+p * (1 - p) / n # 0.0013
 ####################################################################################
 # ISRS Exercise 2.2 - Heart transplants, Part II
 #
@@ -105,27 +152,34 @@ ex2 <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/ex2.csv")
 #
 # (a) What proportion of patients in the treatment group and what proportion
 #     of patients in the control group died?
+# treatment: 24 alive, 45 dead -> 69 total
+# control: 4 alive, 30 dead -> 34 total
+# treatment death proportion is 45/69
+# control death proportion is 30/34
 # (b) One approach for investigating whether or not the treatment is effective
 #     is to use a randomization technique.
 #     i. What are the claims being tested? Use the same null and alternative
 #          hypothesis notation used in the section.
+# null hypothesis (H0): no difference in death rates
+# alternative hypothesis (H1): treatment changes death rates (usually improves survival, so fewer deaths)
 #     ii. The paragraph below describes the set up for such approach, if we were
 #     to do it without using statistical software. Fill in the blanks with a
 #     number or phrase, whichever is appropriate. 
-#          We write alive on _______ cards representing patients who were
-#          alive at the end of the study, and dead on ______ cards representing
+#          We write alive on 28 cards representing patients who were
+#          alive at the end of the study, and dead on 75 cards representing
 #          patients who were not. Then, we shuffle these cards and split them
-#          into two groups: one group of size _______ representing treatment, and
-#          another group of size _________ representing control. We calculate the
+#          into two groups: one group of size 69 representing treatment, and
+#          another group of size 34 representing control. We calculate the
 #          difference between the proportion of dead cards in the treatment and
 #          control groups (treatment - control) and record this value. We repeat
-#          this many times to build a distribution centered at ________. Lastly, we
+#          this many times to build a distribution centered at 0. Lastly, we
 #          calculate the fraction of simulations where the simulated differences
-#          in proportions are _________. If this fraction is low, we conclude that it is
+#          in proportions are as extreme or more extreme than the observed value. If this fraction is low, we conclude that it is
 #          unlikely to have observed such an outcome by chance and that the null
 #          hypothesis should be rejected in favor of the alternative.
 #     iii. What do the simulation results suggest about the effectiveness of
-#          the transplant program? (See textbook for figure.)
+#          the transplant program? (See textbook for figure.) # there is some evidence the transplat improves survival,
+#          but results are not overwhelmingly strong statistically.
 
 ####################################################################################
 # ISRS Exercise 2.6 
@@ -160,10 +214,15 @@ ex2 <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/ex2.csv")
 # histogram shows the distribution of the simulated differences.
 #
 # (a) What are the hypotheses?
+# Null hypothesis is whether yawning is independent of whether someone nearby yawns. 
+# Alternative hypothesis is whether people are more likely to yawn when someone nearby yawns.
 # (b) Calculate the observed difference between the yawning rates under the
 #     two scenarios.
+# p_hat treatment = 4/16 and p_hat control = 10/34. So, 4/16 - 10/34 is -0.044
 # (c) Estimate the p-value using the figure and determine the conclusion of
 #     the hypothesis test.
+# The simulation results suggest that the observed difference could easily be explained by random chance.
+# There is insufficient evidence to conclude that having a person yawn nearby increases the likelihood that another person will yawn.
 
 ####################################################################################
 # IST Exercise 9.2 
@@ -189,5 +248,27 @@ ex2 <- read_csv("http://pluto.huji.ac.il/~msby/StatThink/Datasets/ex2.csv")
 #    measurements is Normal and there are 29 patients in the first group and 21
 #    in the second. Find the interval that contains 95% of the sampling
 #    distribution of the statistic.
+Tvals <- replicate (10000, {
+
+    x1 <- rnorm(29, mean = 3.5, sd = 3)
+    x2 <- rnorm(21, mean = 3.5, sd = 1.5)
+
+    T <- (mean(x1) - mean(x2)) /
+        sqrt(var(x1)/29 + var(x2)/21)
+    
+    T
+})
+
+quantile(Tvals, c(0.025, 0.975))
+# [-1.97, 2.066]
 # 2. Does the observed value of T (computed from the "magnets" data) fall
 #    inside or outside the interval computed in 1?
+magnets$active <- gsub('"', '', magnets$active)
+
+active_group <- magnets %>% filter(active == "1")
+placebo_group <- magnets %>% filter(active == "2")
+
+Tobs <- (mean(active_group$change) - mean(placebo_group$change)) /
+    sqrt(var(active_group$change)/29 + var(placebo_group$change)/21)
+
+# test statistic is 5.985, telling us how far are we apart the two group means are, in standard error units. It falls outside of the 95% interval.
