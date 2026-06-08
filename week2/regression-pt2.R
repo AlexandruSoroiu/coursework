@@ -26,15 +26,22 @@ body <- read.table("body.dat.txt", header = TRUE)
 babyweights <- read.table("babyweights.txt", header = TRUE)
 
 # a. Write the equation of the regression line.
+# y_hat = 123.05 - 8.94x
 # b. Interpret the slope in this context, and calculate the predicted birth weight of babies born to
 # smoker and non-smoker mothers.
+# non-smoker prediction: 123.05 - 8.94 * 0 = 123.05
+# smoker prediction: 123.05 - 8.94 * 1 = 114.11
+# Interpretation: As the smoke variable changes from 0 to 1, the baby weight (ounces) decreases by 8.94 ounces.
 # c. Is there a statistically significant relationship between the average birth weight and smoking?
+# Since the p-value is essentially 0, which is well below a common level of significance (0.05), we reject
+# the null hypothesis and conclude that there is a statistically significant relationship between
+# smoking and birth weight.
 
 ###################################################################################
 # ISRS Exercise 6.2
 # Exercise 6.1 introduces a data set on birth weight of babies.
-#Another variable we consider is parity, which is 0 if the child is the first born, and 1 otherwise.
-#The summary table below shows the results of a linear regression model for predicting the average
+# Another variable we consider is parity, which is 0 if the child is the first born, and 1 otherwise.
+# The summary table below shows the results of a linear regression model for predicting the average
 # birth weight of babies, measured in ounces, from parity
 # Coefficients:
 #               Estimate  Std. Error  t value  Pr(>|t|)
@@ -42,9 +49,17 @@ babyweights <- read.table("babyweights.txt", header = TRUE)
 # parity          -1.93        1.19    -1.62    0.1052
 #
 # a. Write the equation of the regression line.
+# y_hat = 120.07 - 1.93x
 # b. Interpret the slope in this context, and calculate the predicted birth weight of first borns and
 #    others.
+# first borners prediction: 120.07 - 1.93 * 0 = 120.07
+# others prediction: 120.07 - 1.93 * 1 = 118.14
+# Interpretation: As the intercept (parity) changes from 0 to 1, the average body weight will decrease
+# by 1.93 ounces.
 # c. Is there a statistically significant relationship between the average birth weight and parity?
+# Since the p-value is > 0.1 (10%), we can conclude that on a normal 5% level of significance, 
+# the null hypothesis will fail to be rejected, and that there is NO statistically significant relationship between the
+# average birth weight and parity. So we would have to reject the alternative hypothesis.
 
 ###################################################################################
 # ISRS Exercise 6.3
@@ -73,10 +88,25 @@ babyweights <- read.table("babyweights.txt", header = TRUE)
 # smoke           -8.40        0.95    -8.81    0.0000
 #
 # a. Write the equation of the regression line that includes all variables:
+# y_hat = -80.41 + 0.44x1 - 3.33x2 - 0.01x3 + 1.15x4 + 0.05x5 - 8.40 x6
 # b. Interpret the slopes of gestation and age in this context:
+# Holding all other variables in the model constant, each additional day of gestation is associated 
+# with an average increase of approximately 0.44 ounces in an infant's birth weight, while each 
+# additional year of the mother's age is associated with an average decrease of approximately 0.01 
+# ounces in the infant's birth weight.
 # c. The coefficient for parity is different than in the linear model shown in Exercise 6.2. Why
 #    might there be a difference?
+# The coefficient for parity is different because in the previous exercise we dealth with a simple linear
+# regression model, and in this exercise we have a multiple linear regression model, where each variable
+# is a single one and has a unique effect towards the predicted value, as opposed to the simple model that
+# has a total effect overall.
 # d. Calculate the residual for the first observation in the dataset.
+# observed bwt is 120
+# predicted value is = -80.41 + 284 * 0.44 - 3.33 * 0 - 0.01 * 27 + 1.15 * 62 + 0.05 * 100 - 8.4 * 0 =
+# = - 80.41 + 124.96 - 0.27 + 71.3 + 5 = 120.58
+# Residual is 120 - 120.58 = - 0.58
 # e. The variance of the residuals is 249.28, and the variance of the birth weights of all babies
 #    in the data set is 332.57. Calculate the R^2 and the adjusted R^2. Note that there are 1,236
-#    bservations in the data set.
+#    observations in the data set.
+# R^2 = 1 - (249.28 / 332.57) = 1 - 0.749 = 0.251
+# Adjusted R^2 = 1 - (1 - 0.251) * (1236 - 1) / (1236 - 6 - 1) = 0.2474
