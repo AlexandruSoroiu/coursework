@@ -35,6 +35,16 @@ head(ratings) %>% kable()
 
 ```{r dist-ratings}
 # plot the distribution of rating values https://speakerdeck.com/jhofman/modeling-social-data-lecture-2-introduction-to-counting?slide=26
+ratings %>%
+  group_by(rating) %>%
+  ggplot(aes(x = rating, fill = as.factor(rating), color = as.factor(rating))) +
+  scale_y_continuous(label = comma) +
+  geom_histogram() +
+  labs(
+    x = "Rating", y = "Number of Ratings", title = "Distribution of Rating Values", 
+  fill = "Rating", color = "Rating") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ## Per-movie stats
@@ -42,16 +52,35 @@ head(ratings) %>% kable()
 ```{r aggregate-by-movie}
 # aggregate ratings by movie, computing mean rating and number of ratings
 # hint: use the n() function for easy counting within a group
+aggregate_by_movie <-ratings %>%
+  group_by(movie_id) %>%
+  summarize(mean_rating = mean(rating), number_of_ratings = n())
 ```
 
 ```{r dist-movie-popularity}
 # plot distribution of movie popularity (= number of ratings the movie received)
 # hint: try scale_x_log10() for a logarithmic x axis
+aggregate_by_movie %>%
+  ggplot(aes(x = number_of_ratings)) +
+  geom_histogram(color = "red", fill = "green") +
+  scale_x_log10() +
+  labs(
+    x = "Number of ratings", y = "No. of Movies with the Respective Rating",
+    title = " Distribution of Movie Popularity") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r dist-mean-ratings-by-movie}
 # plot distribution of mean ratings by movie https://speakerdeck.com/jhofman/modeling-social-data-lecture-2-introduction-to-counting?slide=28
 # hint: try geom_histogram and geom_density
+aggregate_by_movie %>%
+  ggplot(aes(x = mean_rating)) +
+  geom_density(color = "#021f4d", fill = "violet") +
+  labs(
+    x = "Rating Mean", y = "Density", title = "Distribution of Mean Rating") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 ```{r cdf-movie-pop}
@@ -60,6 +89,18 @@ head(ratings) %>% kable()
 # store the result in a new data frame so you can use it in creating figure 2 from the paper below
 
 # plot the CDF of movie popularity
+cdf_movie_pop <- aggregate_by_movie %>%
+  arrange(desc(number_of_ratings)) %>%
+  mutate(cumulative_fraction = ((cumsum(number_of_ratings))/(sum(number_of_ratings))), rank = row_number())
+  
+cdf_movie_pop %>% 
+  ggplot(aes(x = rank, y = cumulative_fraction)) +
+  geom_line(color = "blue", linewidth = 3) +
+  labs(
+    x = "Movie Rank", y = "CDF", title = "CDF Rank Movies by Popularity"
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 
@@ -67,11 +108,24 @@ head(ratings) %>% kable()
 
 ```{r aggregate-by-user}
 # aggregate ratings by user, computing mean and number of ratings
+aggregate_by_user <- ratings %>% 
+  group_by(user_id) %>%
+  summarize(rating_mean = mean(rating), no_of_ratings = n())
 ```
 
 ```{r dist-user-activity}
 # plot distribution of user activity (= number of ratings the user made)
 # hint: try a log scale here
+aggregate_by_user %>%
+  ggplot(aes(x = no_of_ratings)) + 
+  geom_histogram(color = "brown", fill = "purple") +
+  scale_x_log10(label = comma) +
+  labs(
+    x = "Number of Ratings per User", y = "Number of Users with the Respective Rating",
+    title = "Distribution of User Activity(number of ratings the users made)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 # Anatomy of the long tail
@@ -91,4 +145,24 @@ head(ratings) %>% kable()
 # paper, produce one curve for the 100% user satisfaction level and
 # another for 90%---do not, however, bother implementing the null
 # model (shown in the dashed lines).
+long_tail <- ratings %>%
+  group_by(user_id) %>%
+  filter(n() >= 10) %>% 
+  left_join(cdf_movie_pop, by = "movie_id")
+
+long_tail %>%
+  group_by(user_id) %>%
+  summarize(min_inventory_100 = max(rank), min_inventory_90 = quantile(rank, 0.9)) %>%
+  arrange(min_inventory_100) %>%
+  pivot_longer(names_to = "satisfaction_level"  , values_to = "inventory_size", cols = c(min_inventory_90, min_inventory_100)) %>%
+  group_by(satisfaction_level) %>%
+  arrange(inventory_size) %>%
+  mutate(cumulative_fraction_of_users_satisfied = ((row_number())/(n()))) %>%
+  ggplot(aes(x = inventory_size, cumulative_fraction_of_users_satisfied, color = satisfaction_level, fill = satisfaction_level)) +
+  geom_line() +
+  labs(
+    x = "Inventory Size", y = "Fraction of Users Satisfied", title = "Fraction of Users Satisfied as a Function of Inventory Size"
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
