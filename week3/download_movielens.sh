@@ -9,7 +9,11 @@
 url=https://files.grouplens.org/datasets/movielens/ml-10m.zip
 
 # download ratings zip file
+<<<<<<< HEAD
 [ -f ml-10m.zip ] || curl -o ml-10m.zip $url
+=======
+[ -f movielens_10M.zip ] || curl -L -o movielens_10M.zip $url
+>>>>>>> f2f1de5d75b3d147a44bc7c4c163222c294c75e1
 
 # uncompress zip file
 if [ ! -f ratings.dat ]
