@@ -1,0 +1,81 @@
+---
+title: "Testing Citibike Predictions on 2015 Data"
+author: "Alexandru Soroiu"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, message=FALSE}
+library(tidyverse)
+library(lubridate)
+library(slider)
+```
+
+## Load data
+
+``` {r} 
+trips_2015 <- read_tsv("trips_per_day_2015.tsv")
+weather_2015 <- read_csv("weather_2015.csv")
+
+load("final_model.RData")
+```
+
+## Join trips and weather
+
+``` {r} 
+citibike_2015 <- trips_2015 %>%
+  left_join(weather_2015, by = c("ymd" = "DATE")) %>%
+  rename(
+    prcp = PRCP,
+    snow = SNOW,
+    snwd = SNWD,
+    tmax = TMAX,
+    tmin = TMIN
+  ) %>%
+    mutate(
+    tmax = ((tmax - 32) * 5/9) / 10,
+    tmin = ((tmin - 32) * 5/9) / 10
+)
+```
+
+## Feature engineering
+
+``` {r} 
+citibike_2015_features <- citibike_2015 %>%
+  arrange(ymd) %>%
+  mutate(
+    log_prcp = log(prcp + 1),
+    very_heavy_rain = prcp > 3,
+    day_of_week = wday(ymd, label = TRUE),
+    month = factor(month(ymd), levels = 1:12),
+    weekend = day_of_week %in% c("Sat", "Sun"),
+    lag_1_trips = lag(num_trips, 1),
+    avg_7_trips = slider::slide_dbl(
+      lag(num_trips),
+      mean,
+      .before = 6,
+      .complete = TRUE
+    )
+  ) %>%
+  drop_na(num_trips, tmin, log_prcp, very_heavy_rain, month, weekend, lag_1_trips, avg_7_trips)
+```
+
+## Predict 2015 trips
+
+``` {r}
+citibike_2015_features <- citibike_2015_features %>%
+  mutate(
+    predicted_trips = predict(final_model, newdata = citibike_2015_features)
+  )
+```
+
+## Compute the 2015 RMSE
+
+``` {r}
+rmse_2015 <- sqrt(
+  mean((citibike_2015_features$predicted_trips -
+          citibike_2015_features$num_trips)^2)
+)
+
+rmse_2015
+```
